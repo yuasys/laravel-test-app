@@ -56,3 +56,9 @@ $ cd <project group>    #そこに移動してから作業開始
 # laravel sailをインストール
 $ curl -s https://laravel.build/<project-name>|bash
 ```
+
+【これ表記についての注意事項】  
+これ以降のプロジェクト名はtest-appと表記します。  
+また、プロジェクトフォルダの絶対パスは~/source/test-app/と表記します。  
+異なるバスに異なるプロジェクト名をつかた場合はそれぞれ置き換えて作業を進めてください。
+

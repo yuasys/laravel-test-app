@@ -54,7 +54,10 @@ $ mkdir <project group> #任意のディレクトリを作成し、
 $ cd <project group>    #そこに移動してから作業開始
 
 # laravel sailをインストール
-$ curl -s https://laravel.build/<project-name>|bash
+$ curl -s https://laravel.build/<project-name>?php=81|bash
+
+# curlコマンドで、Laravelのプロジェクト作成の最後に、PCのパスワードを求められる
+
 ```
 
 【表記についての注意事項】  

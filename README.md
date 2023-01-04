@@ -55,9 +55,20 @@ $ cd <project group>    #そこに移動してから作業開始
 
 # laravel sailをインストール
 $ curl -s https://laravel.build/<project-name>?php=81|bash
-
 # curlコマンドで、Laravelのプロジェクト作成の最後に、PCのパスワードを求められる
 
+# laravelのプロジェクトが作成さえた直後のメッセージに従い下記コマンドを打つ
+$ cd <project-name>
+# sailを起動する
+$ ./vendor/bin/sail up
+# 仮想環境dockerでlaavel sailが機能するのを待って、ブラウザから確認する
+# http://localhost
+# 確認を終えたら、control+Cでsailを強制終了させる
+
+# sailをバックグラウンドで起動するには　-dオプションをつける
+$ ./vendor/bin/sail up -d
+# バックグラウンドで起動しているsailを終了させるには下記のコマンドを使う
+$ ./vendor/bin/sail stop
 ```
 
 【表記についての注意事項】  

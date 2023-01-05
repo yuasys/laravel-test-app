@@ -14,7 +14,7 @@
 
 ## §１ 作業前の準備
 
-### 現状のシステムが要件を満たすように調整する
+### １．現状のシステムが要件を満たすように調整する
 
 #### 要件１：wsl2がインストールされていること
 
@@ -94,3 +94,20 @@ alias sail="~/source/test-app/vendor/bin/sail"
 $ source ~/.bashrc
 
 ```
+
+## §３ Laravel Breezeの導入
+
+Laravel Breezeとは：ログイン、ユーザー登録、パスワードリセット、メール確認、パスワード確認など、すべての認証機能を最小かつシンプルにLaravelへ実装したもので、ユーザーが名前、電子メールアドレス、パスワードを更新できるシンプルな「プロファイル」ページが含まれる便利なスターターキット。  
+[日本語マニュアル](https://readouble.com/laravel/9.x/ja/starter-kits.html)
+
+```bash
+# Laravel Breezeのパッケージをインストール
+$ sail composer require laravel/breeze --dev 
+
+# Laravel Breezeのインストール
+$ sail php artisan breeze:install
+```
+
+Laravel Breezeをインストールすると、このように初期画面の右上に『Log in』『Register』のリンクが追加される。
+
+![Breeze初期画面](https://onetech.vn/wp-content/uploads/2022/12/image-5.png)

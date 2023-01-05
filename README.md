@@ -100,6 +100,8 @@ $ source ~/.bashrc
 Laravel Breezeとは：ログイン、ユーザー登録、パスワードリセット、メール確認、パスワード確認など、すべての認証機能を最小かつシンプルにLaravelへ実装したもので、ユーザーが名前、電子メールアドレス、パスワードを更新できるシンプルな「プロファイル」ページが含まれる便利なスターターキット。  
 [日本語マニュアル](https://readouble.com/laravel/9.x/ja/starter-kits.html)
 
+🐯注意事項：ターミナル作業をする前に、sailが起動されている事が必要です。起動されていないとエラーになります。
+
 ```bash
 # Laravel Breezeのパッケージをインストール
 $ sail composer require laravel/breeze --dev 

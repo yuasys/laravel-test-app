@@ -422,5 +422,3 @@ $ sail php artisan make:controller AdminController
    INFO  Controller [app/Http/Controllers/AdminController.php] created successfully.  
 ```
 
-
-

@@ -113,3 +113,314 @@ $ sail php artisan breeze:install
 Laravel Breezeをインストールすると、このように初期画面の右上に『Log in』『Register』のリンクが追加される。
 
 ![Breeze初期画面](https://onetech.vn/wp-content/uploads/2022/12/image-5.png)
+<hr/>
+
+## §４ AdminLTEの導入
+
+### １．イメージ取得とインストール
+
+```bash
+# AdminLTEのパッケージをインストールする
+$ sail composer require jeroennoten/laravel-adminlte
+
+# AdminLTEをインストールする
+$ sail php artisan adminlte:install
+
+```
+
+### ２．管理者テーブルを作成する
+
+ここでは管理者テーブルのテーブル名は「admin_users」とする。
+
+#### (1)マイグレーションファイルとモデルを作成する
+
+```bash
+$ sail php artisan make:model AdminUser -m
+```
+
+【解説１】モデル名AdminUser:２つの単語をアッパーケース（頭文字を大文字）で連記する。２つ目の単語は必ず単数形で書く。 このルールを守れば「単語１_単語２の複数形」というテーブル名を自動生成してくれる。  
+
+【解説２】オプション -m または --migration：このオプションによりモデルと同時にマイグレーションの各ファイルを自動で生成してくれる。
+
+#### （２）マイグレーションファイルを修正する
+
+```bash
+# ---ファイル；ddatabase/migrations/20YY_MM_DD_hhmmss_create_admin_users_table.php
+# 以下編集内容（一部）
+
+public function up()
+    {
+        Schema::create('admin_users', function (Blueprint $table) { // 修正
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
+            $table->timestamps();
+        });
+    }
+```
+
+#### （３）AdminUserファイルの編集
+
+Breezeをインストールしたときに作成されているapp/Models/User.phpの記述をコピーして、AdminUser.phpに貼り付けて、クラス名を『User』から『AdminUser』に修正する。
+
+#### （４）config/auth.phpの編集
+
+『users』の部分を『admin_users』、『User』の部分を『AdminUser』に修正する。
+
+```php
+<?php
+return [
+
+    'defaults' => [
+        'guard' => 'web',
+        'passwords' => 'admin_users', // 修正
+    ],
+
+    'guards' => [
+        'web' => [
+            'driver' => 'session',
+            'provider' => 'admin_users', // 修正
+        ],
+    ],
+
+    'providers' => [
+        'admin_users' => [ // 修正
+            'driver' => 'eloquent',
+            'model' => App\Models\AdminUser::class, // 修正
+        ],
+        // 'users' => [
+        //     'driver' => 'database',
+        //     'table' => 'users',
+        // ],
+    ],
+
+    'passwords' => [
+        'admin_users' => [ // 修正
+            'provider' => 'admin_users', // 修正
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+    ],
+
+    'password_timeout' => 10800,
+];
+```
+
+#### （５）RegisteredUserController.phpの編集
+
+app/Http/Controllers/Auth/RegisteredUserController.phpは、以下のように『User』を『AdminUser』に修正する
+
+```php
+<?php
+namespace App\Http\Controllers\Auth;
+use App\Http\Controllers\Controller;
+use App\Models\AdminUser; // 修正
+use App\Providers\RouteServiceProvider;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
+class RegisteredUserController extends Controller
+{
+    /**
+     * Display the registration view.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function create()
+    {
+        return view('auth.register');
+    }
+    /**
+     * Handle an incoming registration request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.AdminUser::class], // 修正
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+        $user = AdminUser::create([ // 修正
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+        event(new Registered($user));
+        Auth::login($user);
+        return redirect(RouteServiceProvider::HOME);
+    }
+}
+```
+
+#### （６）マイグレーションを実行
+
+[失敗から修正、成功までの事例]
+
+```bash
+# マイグレーションのコマンドを実行
+$ sail php artisan migrate
+   INFO  Preparing database.  
+
+  Creating migration table ................................................................ 105ms DONE
+
+   INFO  Running migrations.  
+
+  2014_10_12_000000_create_users_table .................................................... 252ms DONE
+  2014_10_12_100000_create_password_resets_table .......................................... 300ms DONE
+  2019_08_19_000000_create_failed_jobs_table .............................................. 187ms DONE
+  2019_12_14_000001_create_personal_access_tokens_table ................................... 289ms DONE
+  2023_01_05_201007_create_admin_users_table ................................................ 0ms FAIL
+
+   BadMethodCallException 
+
+  Method Illuminate\Database\Schema\Blueprint::remenberToken does not exist.
+～略～
+# ↑のエラーは、remenberTokenなんて存在しないと怒っている様子
+```
+
+[ エラー解析 ]
+🐯エラーメッセージで分かるようにmとnのスペル違いだったようだ。正：rememberToken  誤：remenberToken  
+
+[ 修正前の結果確認方法]
+
+```bash
+# マイグレーション結果を確認するコマンド
+$ sail php artissan migrate:status
+  Migration name ...................................................................... Batch / Status  
+  2014_10_12_000000_create_users_table ....................................................... [1] Ran  
+  2014_10_12_100000_create_password_resets_table ............................................. [1] Ran  
+  2019_08_19_000000_create_failed_jobs_table ................................................. [1] Ran  
+  2019_12_14_000001_create_personal_access_tokens_table ...................................... [1] Ran  
+  2023_01_05_201007_create_admin_users_table ................................................. Pending  
+# ↑予想通りdamin_usersテーブルのみエラーでPendingになっている。（他のテーブルはOK）
+```
+
+[ スペルを修正してからサイドマイグレーションして結果を確認する ]
+
+```bash
+# 再度マイグレーションを実行
+$ sail php artisan migrate
+   INFO  Running migrations.  
+
+  2023_01_05_201007_create_admin_users_table .............................................. 118ms DONE
+# 再度マイグレーション結果を確認
+$ sail php artisan migrate:status
+  Migration name ...................................................................... Batch / Status  
+  2014_10_12_000000_create_users_table ....................................................... [1] Ran  
+  2014_10_12_100000_create_password_resets_table ............................................. [1] Ran  
+  2019_08_19_000000_create_failed_jobs_table ................................................. [1] Ran  
+  2019_12_14_000001_create_personal_access_tokens_table ...................................... [1] Ran  
+  2023_01_05_201007_create_admin_users_table ................................................. [2] Ran  
+# ↑全部OKになっていた！
+```
+
+#### （７）MySQLコマンドでテーブルが出来ていることを確認
+
+sailから直接mysqlコマンドを打ってDB操作(テーブル存在の確認など）ができる
+
+```bash
+$ sail mysql
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 739
+Server version: 8.0.31 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> show tables;
++------------------------+
+| Tables_in_test_app     |
++------------------------+
+| admin_users            |
+| failed_jobs            |
+| migrations             |
+| password_resets        |
+| personal_access_tokens |
+| users                  |
++------------------------+
+6 rows in set (0.01 sec)
+
+mysql> exit
+Bye
+```
+
+上記のようになっていればOK  
+
+### ３．ログイン後の画面へのルーティングを設定
+
+#### （１）routes/web.phpの編集（追加）
+
+管理画面のトップページへのルーティングを設定する。ログインしていない場合は管理画面トップにアクセスできないようにミドルウェアを設定しておく。  
+
+```php
+<?php
+
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController; //追加-----------------------------
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+//以下を追加-----------------ログインしていないと不可にする-----------------ここから
+Route::middleware('auth')->group(function(){
+    // ログイン後の画面
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+}) // -------------------------------------------------------------------ここまで
+
+require __DIR__.'/auth.php';
+```
+
+#### （２）app/Providers/RouteServiceProvider.php編集で遷移先を設定
+
+下記の通りに変更する
+
+```php
+//変更部分のみ以下に記述
+public const HOME = '/admin';//変更前 '/dashboard'
+```
+
+### ４．コントローラの作成
+
+ここでは、必要なコントローラーを「AdminController」という名前で作成する。
+
+#### （１）AdminControllerを生成するコマンドを実行
+
+```bash
+$ sail php artisan make:controller AdminController
+
+   INFO  Controller [app/Http/Controllers/AdminController.php] created successfully.  
+```
+
+
+

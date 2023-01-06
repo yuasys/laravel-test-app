@@ -422,3 +422,26 @@ $ sail php artisan make:controller AdminController
    INFO  Controller [app/Http/Controllers/AdminController.php] created successfully.  
 ```
 
+【確認】
+上記のコマンドで app/Http/Controllers/AdminController.phpファイルが自動生成されているか確認する
+
+#### （２）AdminControllerにindexアクションを追加する
+
+app/Http/Controllers/AdminController.phpを下記のように編集する。
+
+```php
+<?php
+namespace App\Http\Controllers;
+use Illuminate\Http\Request;
+class AdminMainController extends Controller
+{
+    public function index()
+    {
+        return view('admin.index');
+    }
+}
+```
+
+
+
+

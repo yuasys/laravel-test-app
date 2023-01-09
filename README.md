@@ -427,13 +427,19 @@ $ sail php artisan make:controller AdminController
 
 #### （２）AdminControllerにindexアクションを追加する
 
-app/Http/Controllers/AdminController.phpを下記のように編集する。
+app/Http/Controllers/AdminController.phpを下記のように編集する。  
+
+
+【注意】元ネタとして参考にさせていただいている[サイト](https://onetech.jp/blog/how-to-create-a-good-admin-screen-in-laravel9-15789#lwptoc6)では、この部分のソースが間違っている。  
+・間違っている場所：クラス名  
+・誤記：AdminMainController  
+・正解：AdminController
 
 ```php
 <?php
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
-class AdminMainController extends Controller
+class AdminController extends Controller
 {
     public function index()
     {
@@ -442,6 +448,28 @@ class AdminMainController extends Controller
 }
 ```
 
+### ５．管理画面トップページの作成
 
+管理画面トップページとは、管理者がログイン直後に表示されるページ。
+
+以下のように、resourses/views/admin/index.blade.phpを作成する。
+【注意】このphpページの先頭に 「<? 」を書くとエラーになる。
+
+```php
+@extends('adminlte::page')
+@section('title', '管理画面トップ')
+@section('content_header')
+    <h1>管理画面トップページ</h1>
+@stop
+@section('content')
+    <div>ここにコンテンツが入ります。</div>
+@stop
+@section('css')
+    {{-- CSSファイルを記述 --}}
+@stop
+@section('js')
+    {{-- JSファイルを記述 --}}
+@stop
+```
 
 

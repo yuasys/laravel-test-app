@@ -472,4 +472,57 @@ class AdminController extends Controller
 @stop
 ```
 
+## §５ AdminLTEのカスタマイズ
+
+### 1. ログイン画面にAdminLTEを適用する
+
+#### (1) AdminLTEの導入状況を確認する
+
+```bash
+$ sail php arttisan adminlte:status
+Checking the resources installation ...
+ 7/7 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+All resources checked succesfully!
+
++------------------+------------------------------------------+---------------+----------+
+| Package Resource | Description                              | Status        | Required |
++------------------+------------------------------------------+---------------+----------+
+| assets           | The AdminLTE required assets             | Installed     | true     |
+| config           | The default package configuration file   | Installed     | true     |
+| translations     | The default package translations files   | Installed     | true     |
+| main_views       | The default package main views           | Not Installed | false    |
+| auth_views       | The default package authentication views | Mismatch      | false    |
+| basic_views      | The default package basic views          | Not Installed | false    |
+| basic_routes     | The package routes                       | Not Installed | false    |
++------------------+------------------------------------------+---------------+----------+
+
+Status legends:
++---------------+----------------------------------------------------------------------------------------------+
+| Status        | Description                                                                                  |
++---------------+----------------------------------------------------------------------------------------------+
+| Installed     | The resource is installed and matches with the default package resource                      |
+| Mismatch      | The installed resource mismatch the package resource (update available or resource modified) |
+| Not Installed | The package resource is not installed                                                        |
++---------------+----------------------------------------------------------------------------------------------+
+
+```
+
+#### (2) ログイン・登録画面のデザイン変更
+
+ログイン画面のデザインにAdminLTEのテンプレートファイルを適用する
+【注意】この手順では既存のログインテンプレートファイルが上書きされるので、必要ならバックアップを行うこと  
+
+以下のコマンドを実行
+
+```bash
+$ sail php artisan adminlte:install --only=auth_views
+# 下記の警告が出るので、問題がなければ「yes」を入力
+The authentication views already exists. Want to replace the views? (yes/no) [no]: yes
+```
+
+#### (3) 確認
+
+ログイン画面は```http://localhost/login``` で、登録画面は ```http://localhost/register``` で下記のような画面になっていればOK。
+
+
 

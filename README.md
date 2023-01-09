@@ -523,6 +523,7 @@ The authentication views already exists. Want to replace the views? (yes/no) [no
 #### (3) 確認
 
 ログイン画面は```http://localhost/login``` で、登録画面は ```http://localhost/register``` で下記のような画面になっていればOK。
-
+![login](/public/images/login20230109.png)
+![register](/public/images/register20230109.png)
 
 
